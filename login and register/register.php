@@ -72,7 +72,7 @@
                     <input type="submit" class="btn" name="submit" value="Register" required>
                 </div>
                 <div class="links">
-                    Already a member? <a href="index.php">Sign In</a>
+                    Sudah Punya Akun? <a href="index.php">Sign In</a>
                 </div>
             </form>
         </div>

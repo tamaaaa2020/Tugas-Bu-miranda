@@ -1,65 +1,78 @@
-<?php 
-   session_start();
+<?php
+session_start();
+include("php/config.php");
 
-   include("php/config.php");
-   if(!isset($_SESSION['valid'])){
-    header("Location: index.php");
-   }
+if (!isset($_SESSION['valid'])) {
+    header("Location: home.php");
+    exit();
+}
+
+
+$query = "SELECT * FROM news";
+$result = mysqli_query($con, $query);
+
+
+if (!$result) {
+    die("Query error: " . mysqli_error($con));
+}
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/style.css">
     <title>Home</title>
 </head>
 <body>
-    <div class="nav">
-        <div class="logo">
-            <p><a href="home.php">HALLO KAK</a> </p>
-        </div>
-
+    <div class="header">
+       <img src="images/header.jpg" alt="backround">
+        <p>Selamat Datang</p>
         <div class="right-links">
-
-            <?php 
-            
-            $id = $_SESSION['id'];
-            $query = mysqli_query($con,"SELECT*FROM users WHERE Id=$id");
-
-            while($result = mysqli_fetch_assoc($query)){
-                $res_Uname = $result['Username'];
-                $res_Email = $result['Email'];
-                $res_Age = $result['Age'];
-                $res_id = $result['Id'];
-            }
-            
-            echo "<a href='edit.php?Id=$res_id'>Change Profile</a>";
-            ?>
-
-            <a href="php/logout.php"> <button class="btn">Log Out</button> </a>
-
+            <a class="btn" href="php/logout.php">Log Out</a>
+            <a class="btn" href="create.php">Buat Berita Anda</a>
         </div>
     </div>
     <main>
+        <h1>Berita</h1>
+        <?php while ($row = mysqli_fetch_assoc($result)): ?>
+            <div class="news-item">
+                <h2><?php echo htmlspecialchars($row['title']); ?></h2>
+                <?php if (!empty($row['image'])): ?>
+                    <p><img src="uploads/<?php echo htmlspecialchars($row['image']); ?>" alt="News Image" width="200"></p>
+                <?php endif; ?>
+                <p><?php echo nl2br(htmlspecialchars($row['content'])); ?></p>
+                <p>penulis: <?php echo htmlspecialchars($row['category']); ?></p>
+                
+                <p>Dibuat pada: <?php echo htmlspecialchars($row['created_at']); ?></p>
+                <?php if ($row['username'] == $_SESSION['username']): ?> <div class="cont-btn">
+                    <a href="edit.php?id=<?php echo $row['id']; ?>"><button class="btn">Edit</button></a>
+                    <a href="delete_action.php?id=<?php echo $row['id']; ?>" onclick="return confirm('Anda yakin ingin menghapus berita ini?');"><button class="btn">Hapus</button></a></div>
+                <?php endif; ?>
+            </div>
+        <?php endwhile; ?>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-       <div class="main-box top">
-          <div class="top">
-            <div class="box">
-                <p>Hai <b><?php echo $res_Uname ?></b>, Selamat Datang</p>
-            </div>
-            <div class="box">
-                <p>Email Kamu  <b><?php echo $res_Email ?></b>.</p>
-            </div>
-          </div>
-          <div class="bottom">
-            <div class="box">
-                <p>Dan Kamu <b><?php echo $res_Age ?> Tahun</b>.</p> 
-            </div>
-          </div>
-       </div>
+        <script>
+            <?php
+                if (isset($_SESSION['success'])) {
+                    if ($_SESSION['success'] == 1) {
+                    
+                    
+            ?>
+                Swal.fire({
+                    title: "Good job!",
+                    text: "You clicked the button!",
+                    icon: "success"
+                });
 
+            <?php
+            $_SESSION['success'] = 0;
+                }
+            }
+            ?>
+        </script>
     </main>
 </body>
 </html>
